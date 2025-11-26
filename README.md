@@ -19,7 +19,7 @@ We use a set of single-omics and multi-omics methods to identify:
 
 > Below is the overall workflow summarizing the full analysis pipeline.
 
-![Graphical abstract](<img width="2160" height="1215" alt="2" src="https://github.com/user-attachments/assets/be8caf8c-1619-40ca-b0ee-b966926fe9e6" />)
+![Graphical abstract](graphical_abstract.png)
 
 ---
 
