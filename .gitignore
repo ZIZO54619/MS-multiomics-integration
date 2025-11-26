@@ -1,0 +1,15 @@
+# Raw data
+data-raw/
+*.RData
+*.rds
+*.csv
+*.xlsx
+
+# R session files
+.Rhistory
+.Rproj.user/
+.RData
+
+# Temporary
+*.tmp
+*.zip
