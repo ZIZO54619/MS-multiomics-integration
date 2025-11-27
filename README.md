@@ -312,3 +312,60 @@ methylation datasets.
 - Highlights biologically interpretable features  
 - Complements MOFA (unsupervised) and SNF (network-based)
 
+
+
+## SNF – Similarity Network Fusion
+
+SNF (Similarity Network Fusion) builds a **joint similarity network** by combining
+the mRNA and methylation similarity graphs.  
+This fused network reveals patient-level structure that cannot be seen from any
+single omic alone.
+
+---
+
+### 🔹 1) Fused Similarity Matrix
+
+The fused similarity matrix shows three stable patient clusters based on combined
+RNA + DNA methylation information.
+
+![SNF matrix](SNF/Fused_similarity_matrix_with_clusters.png)
+
+- Darker colours = stronger similarity  
+- SNF clusters reflect shared biological patterns across omics  
+
+---
+
+### 🔹 2) t-SNE Projection of Fused Network
+
+A t-SNE embedding of the fused network shows clear grouping of samples.
+
+![SNF t-SNE](SNF/t-SNE.png)
+
+This confirms the stability of SNF clusters in a nonlinear low-dimensional space.
+
+---
+
+### 🔹 3) PCA of the Fused Similarity
+
+Principal Component Analysis on the fused similarity matrix shows additional
+separation of the patient groups.
+
+![SNF PCA](SNF/PCA.png)
+
+---
+
+### 🔹 4) Hierarchical Clustering
+
+Hierarchical clustering of the fused similarity network provides a consistent
+cluster structure.
+
+![SNF clustering](SNF/Hierarchical_clustering.png)
+
+---
+
+### ✔️ Summary (SNF)
+
+- SNF integrates methylation + mRNA similarities into a single patient graph  
+- Identifies consistent patient subgroups  
+- Provides complementary information to MOFA and DIABLO  
+- Helps capture sample-level heterogeneity beyond single-omic analyses  
