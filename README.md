@@ -202,7 +202,7 @@ This indicates strong coordinated structure between the two omics layers.
 
 Plotting samples along the learned factors shows clear biological separation.
 
-![MOFA scatter](MOFA/correlationbetweenf13.png)
+![MOFA scatter](MOFA/correlation_between_f1Xf3.png)
 
 - Lesion and NAWM samples cluster apart in the MOFA factor space  
 - Indicates the latent factors capture meaningful disease-related variation  
