@@ -260,7 +260,7 @@ multi-omics molecular signature.
 
 DIABLO clearly separates lesion vs NAWM samples in the first discriminative components.
 
-![DIABLO individuals](DIABLO/plotIndiv.pdf)
+![DIABLO individuals](DIABLO/plotIndiv.png)
 
 This shows the supervised model successfully captures disease-related variation.
 
@@ -271,7 +271,7 @@ This shows the supervised model successfully captures disease-related variation.
 DIABLO identifies correlated sets of CpGs and genes that jointly contribute to
 lesion/NAWM discrimination.
 
-![DIABLO circos](DIABLO/circosPlot.pdf)
+![DIABLO circos](DIABLO/circosPlot.png)
 
 The circos plot displays cross-omics correlations (gene ↔ CpG), revealing
 coordinated regulatory patterns.
@@ -283,7 +283,7 @@ coordinated regulatory patterns.
 DIABLO provides loadings showing which genes and CpGs contribute most strongly
 to the discriminative component.
 
-![DIABLO loadings](DIABLO/loading_plot.pdf)
+![DIABLO loadings](DIABLO/loading_plot.png)
 
 These features form a compact and interpretable multi-omics biomarker signature.
 
@@ -294,7 +294,7 @@ These features form a compact and interpretable multi-omics biomarker signature.
 DIABLO components explain a meaningful proportion of variance across the two
 omics layers.
 
-![DIABLO variance](DIABLO/plotVar.pdf)
+![DIABLO variance](DIABLO/plotVar.png)
 
 This confirms that the discriminative signal is shared between the mRNA and
 methylation datasets.
