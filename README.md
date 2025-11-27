@@ -125,3 +125,80 @@ Lesion and NAWM samples form distinct clusters, reflecting strong transcriptiona
 - Clear gene-level signatures emerge (DEGs)  
 - These genes are later integrated with methylation in MOFA, DIABLO, and SNF
 
+
+## DNA Methylation Analysis
+
+This section summarises the differential methylation analysis between **MS brain
+lesion** and **NAWM** samples. The goal is to identify differentially methylated
+CpG sites (DMPs) and link them to changes in gene expression.
+
+---
+
+### 🔹 1) Quality Control of Methylation Values
+
+Raw beta/M-values were inspected to ensure correct distribution before filtering
+and normalisation.
+
+![Methylation QC](methylation/pm_value.pdf)
+
+The distribution shows the expected bimodal shape typical for Illumina
+methylation arrays, indicating good data quality.
+
+---
+
+### 🔹 2) Differentially Methylated Positions (DMPs)
+
+A differential methylation analysis was performed between lesion and NAWM.
+
+**Volcano plot of CpGs:**
+
+![DMP volcano](methylation/plotvar2.png)
+
+- Each point = CpG site  
+- X-axis = difference in methylation  
+- Y-axis = −log10(p-value)  
+- Significant hyper-/hypo-methylated CpGs clearly separate
+
+---
+
+### 🔹 3) Heatmap of Significant CpGs
+
+A heatmap of the top significantly methylated CpGs shows clear structure and
+good separation between lesion and NAWM samples.
+
+![DMP heatmap](methylation/combopca.pdf)
+
+This pattern indicates strong epigenetic differences between the two tissue types.
+
+---
+
+### 🔹 4) Immune Cell Infiltration (Lesion vs NAWM)
+
+Estimated immune cell proportions (using deconvolution methods) show clear
+lesion-associated immune activation.
+
+![Immune cells](methylation/immunecells_group.jpeg)
+
+Lesion samples display increased immune-cell signatures, consistent with
+pathology of MS lesions.
+
+---
+
+### 🔹 5) Gene-level Integration Example (PALMD)
+
+For genes such as **PALMD**, methylation at multiple CpG sites changes between
+lesion and NAWM, and these changes correlate with gene expression.
+
+![PALMD example](methylation/PALMDboxplot.jpeg)
+
+This provides a direct epigenetic–transcriptomic link and identifies PALMD as a
+potential biomarker.
+
+---
+
+### ✔️ Summary (Methylation)
+
+- Strong methylation changes distinguish lesion from NAWM  
+- Several CpGs map to genes showing matched expression changes  
+- Immune infiltration signatures are strongly elevated in lesion tissue  
+- These findings integrate later with MOFA, DIABLO, and WGCNA
