@@ -369,3 +369,55 @@ cluster structure.
 - Identifies consistent patient subgroups  
 - Provides complementary information to MOFA and DIABLO  
 - Helps capture sample-level heterogeneity beyond single-omic analyses  
+
+
+
+## WGCNA – Network Modules
+
+WGCNA (Weighted Gene Co-expression Network Analysis) was used to identify  
+**co-expression** (and optionally co-methylation) **modules** that group genes/CpGs  
+with similar behaviour across samples.
+
+This helps reveal coordinated biological programs underlying lesion vs NAWM differences.
+
+---
+
+### 🔹 1) Sample Clustering (Outlier Detection)
+
+Before building the network, samples were clustered to check for potential outliers.
+
+![WGCNA sample clustering](WGCNA/Sample_clustering_to_detect_outliers.png)
+
+No strong outliers were detected; therefore, all samples were retained.
+
+---
+
+### 🔹 2) Soft-Threshold Power Selection
+
+The soft-threshold (β) was chosen to achieve approximate scale-free topology.
+
+![WGCNA soft threshold](WGCNA/Rplot04.png)
+
+- The chosen β gives high scale-free fit  
+- Ensures biologically meaningful network structure  
+
+---
+
+### 🔹 3) Gene Co-expression Modules
+
+Using the TOM (Topological Overlap Matrix) and dynamic tree cut,  
+WGCNA identified multiple gene modules (each represented by a colour).
+
+![WGCNA modules](WGCNA/Expression_Modules.png)
+
+These modules represent groups of genes with coordinated expression patterns  
+that may be linked to lesion/NAWM biology.
+
+---
+
+### ✔️ Summary (WGCNA)
+
+- No outliers detected → all samples used  
+- Scale-free topology achieved at chosen β  
+- Multiple gene modules discovered  
+- Modules serve as features for downstream interpretation and integration  
