@@ -102,7 +102,7 @@ up- or down-regulated in lesions compared to NAWM.
 
 We highlight biologically relevant DEGs (immune-related, myelin-related, signalling genes).
 
-![Annotated volcano](mRNA/3_mRNA_lesion_vs_NAWM_volcano_annotated.png)
+![Annotated volcano](mRNA/03_mRNA_lesion_vs_NAWM_volcano_annotated.png)
 
 This plot makes it easier to identify potential biomarkers.
 
