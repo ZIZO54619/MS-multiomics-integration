@@ -243,3 +243,68 @@ MOFA factors were tested against metadata such as tissue type, age and gender.
 - Multi-omics signatures involve genes (e.g., immune-related) and CpGs with coordinated changes  
 - Metadata associations support biological interpretation  
 
+---
+
+## DIABLO – Supervised Multi-Omics Integration
+
+DIABLO (from the mixOmics framework) is a supervised multi-omics integration
+method. It learns components that jointly select **mRNA genes** and **CpG sites**
+that best discriminate **lesion** from **NAWM** samples.
+
+This method directly links RNA expression and DNA methylation to produce a
+multi-omics molecular signature.
+
+---
+
+### 🔹 1) Sample Separation (plotIndiv)
+
+DIABLO clearly separates lesion vs NAWM samples in the first discriminative components.
+
+![DIABLO individuals](DIABLO/plotIndiv.pdf)
+
+This shows the supervised model successfully captures disease-related variation.
+
+---
+
+### 🔹 2) Multi-Omics Correlation Network (Circos Plot)
+
+DIABLO identifies correlated sets of CpGs and genes that jointly contribute to
+lesion/NAWM discrimination.
+
+![DIABLO circos](DIABLO/circosPlot.pdf)
+
+The circos plot displays cross-omics correlations (gene ↔ CpG), revealing
+coordinated regulatory patterns.
+
+---
+
+### 🔹 3) Top Features Selected by DIABLO (Loadings)
+
+DIABLO provides loadings showing which genes and CpGs contribute most strongly
+to the discriminative component.
+
+![DIABLO loadings](DIABLO/loading_plot.pdf)
+
+These features form a compact and interpretable multi-omics biomarker signature.
+
+---
+
+### 🔹 4) Explained Variance
+
+DIABLO components explain a meaningful proportion of variance across the two
+omics layers.
+
+![DIABLO variance](DIABLO/plotVar.pdf)
+
+This confirms that the discriminative signal is shared between the mRNA and
+methylation datasets.
+
+---
+
+### ✔️ Summary (DIABLO)
+
+- Strong supervised separation between lesion vs NAWM  
+- Identifies correlated gene–CpG signatures  
+- Highlights biologically interpretable features  
+- Complements MOFA (unsupervised) and SNF (network-based)
+
