@@ -254,6 +254,8 @@ that best discriminate **lesion** from **NAWM** samples.
 This method directly links RNA expression and DNA methylation to produce a
 multi-omics molecular signature.
 
+![DIABLO comp1](DIABLO/ncomp1.png)
+
 ---
 
 ### 🔹 1) Sample Separation (plotIndiv)
