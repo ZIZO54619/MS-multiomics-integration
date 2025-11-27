@@ -285,6 +285,8 @@ coordinated regulatory patterns.
 DIABLO provides loadings showing which genes and CpGs contribute most strongly
 to the discriminative component.
 
+![DIABLO loadings](DIABLO/loading_plot.png)
+---
 ![DIABLO loadings](DIABLO/loading_plot2.png)
 
 These features form a compact and interpretable multi-omics biomarker signature.
