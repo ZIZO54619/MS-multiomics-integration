@@ -61,3 +61,67 @@ The goal is to:
 
 Raw full-size matrices are excluded using `.gitignore`.  
 Small subsets used in analysis are stored under the `data/` directory.
+
+
+## mRNA Analysis
+
+This section describes the differential expression analysis of the **RNA-seq** data
+comparing MS brain **lesion** vs **NAWM** samples.
+
+---
+
+### 🔹 1) Quality Control of Expression Values
+
+Before running the differential expression analysis, the RNA-seq counts were 
+filtered, normalised, and transformed (log2).  
+The histogram below shows the distribution of processed expression values.
+
+![mRNA QC](mRNA/00_mRNA_processed_counts_hist.png)
+
+The distribution looks typical for RNA-seq data and shows no major artefacts.
+
+---
+
+### 🔹 2) Differential Expression (Lesion vs NAWM)
+
+A differential expression analysis (e.g. DESeq2) identified genes significantly
+up- or down-regulated in lesions compared to NAWM.
+
+**Global volcano plot:**
+
+![Volcano plot](mRNA/01_mRNA_lesion_vs_NAWM_volcano.png)
+
+- Each dot = gene  
+- X-axis = log2 fold change  
+- Y-axis = −log10(p-value)  
+- Red/blue points show significantly regulated genes
+
+---
+
+### 🔹 3) Annotated Volcano (Key DEGs)
+
+We highlight biologically relevant DEGs (immune-related, myelin-related, signalling genes).
+
+![Annotated volcano](mRNA/3_mRNA_lesion_vs_NAWM_volcano_annotated.png)
+
+This plot makes it easier to identify potential biomarkers.
+
+---
+
+### 🔹 4) Heatmap of Significant DEGs
+
+A heatmap of the top differentially expressed genes shows **clear separation**
+between lesion and NAWM samples.
+
+![DEG heatmap](mRNA/02_mRNA_lesion_vs_NAWM_heatmap.png)
+
+Lesion and NAWM samples form distinct clusters, reflecting strong transcriptional differences.
+
+---
+
+### ✔️ Summary (mRNA)
+
+- Lesion samples show strong transcriptional activation relative to NAWM  
+- Clear gene-level signatures emerge (DEGs)  
+- These genes are later integrated with methylation in MOFA, DIABLO, and SNF
+
