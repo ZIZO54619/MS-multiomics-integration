@@ -138,7 +138,7 @@ We identify differentially methylated CpG sites (DMPs), visualise their patterns
 
 Beta- and M-values were inspected to ensure correct distribution before filtering and normalisation.
 
-![Methylation QC](methylation/pm_value.pdf)
+![Methylation QC](<img width="742" height="556" alt="pm_value" src="https://github.com/user-attachments/assets/47ba4b53-7bcc-4731-8438-994b748cb3a4" />)
 
 The bimodal distribution is typical for Illumina methylation arrays and indicates good data quality.
 
