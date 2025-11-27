@@ -128,77 +128,70 @@ Lesion and NAWM samples form distinct clusters, reflecting strong transcriptiona
 
 ## DNA Methylation Analysis
 
-This section summarises the differential methylation analysis between **MS brain
-lesion** and **NAWM** samples. The goal is to identify differentially methylated
-CpG sites (DMPs) and link them to changes in gene expression.
+This section summarises the DNA methylation differences between **MS lesion** and **NAWM** brain tissue.  
+We identify differentially methylated CpG sites (DMPs), visualise their patterns, and explore immune-cell involvement.
 
 ---
 
 ### 🔹 1) Quality Control of Methylation Values
 
-Raw beta/M-values were inspected to ensure correct distribution before filtering
-and normalisation.
+Beta- and M-values were inspected to ensure correct distribution before filtering and normalisation.
 
 ![Methylation QC](methylation/pm_value.pdf)
 
-The distribution shows the expected bimodal shape typical for Illumina
-methylation arrays, indicating good data quality.
+The bimodal distribution is typical for Illumina methylation arrays and indicates good data quality.
 
 ---
 
 ### 🔹 2) Differentially Methylated Positions (DMPs)
 
-A differential methylation analysis was performed between lesion and NAWM.
+A differential methylation analysis identified CpGs that are significantly hyper- or hypo-methylated in lesion tissue.
 
 **Volcano plot of CpGs:**
 
 ![DMP volcano](methylation/plotvar2.png)
 
 - Each point = CpG site  
-- X-axis = difference in methylation  
+- X-axis = methylation difference (lesion – NAWM)  
 - Y-axis = −log10(p-value)  
-- Significant hyper-/hypo-methylated CpGs clearly separate
+- Clear sets of hyper- and hypo-methylated CpGs are visible.
 
 ---
 
-### 🔹 3) Heatmap of Significant CpGs
+### 🔹 3) CpG-level Sample Clustering
 
-A heatmap of the top significantly methylated CpGs shows clear structure and
-good separation between lesion and NAWM samples.
+PCA/heatmap of significant CpGs shows clear structure and separation between lesion and NAWM samples.
 
-![DMP heatmap](methylation/combopca.pdf)
+![CpG PCA / heatmap](methylation/combopca.pdf)
 
-This pattern indicates strong epigenetic differences between the two tissue types.
+This indicates that methylation strongly distinguishes the two tissue types.
 
 ---
 
-### 🔹 4) Immune Cell Infiltration (Lesion vs NAWM)
+### 🔹 4) Immune Cell Infiltration (CIBERSORT)
 
-Estimated immune cell proportions (using deconvolution methods) show clear
-lesion-associated immune activation.
+Epigenetically inferred immune-cell proportions show higher immune activation in lesion samples.
 
 ![Immune cells](methylation/immunecells_group.jpeg)
 
-Lesion samples display increased immune-cell signatures, consistent with
-pathology of MS lesions.
+Lesions exhibit elevated T cells, macrophage activity, and innate immune signals—consistent with MS pathology.
 
 ---
 
-### 🔹 5) Gene-level Integration Example (PALMD)
+### 🔹 5) Example Gene: PALMD (CpG + Expression)
 
-For genes such as **PALMD**, methylation at multiple CpG sites changes between
-lesion and NAWM, and these changes correlate with gene expression.
+PALMD shows multiple CpGs significantly altered between lesion and NAWM.  
+These methylation changes correlate with its gene expression level.
 
 ![PALMD example](methylation/PALMDboxplot.jpeg)
 
-This provides a direct epigenetic–transcriptomic link and identifies PALMD as a
-potential biomarker.
+This highlights a direct epigenetic–transcriptomic link relevant to MS lesion biology.
 
 ---
 
 ### ✔️ Summary (Methylation)
 
-- Strong methylation changes distinguish lesion from NAWM  
-- Several CpGs map to genes showing matched expression changes  
-- Immune infiltration signatures are strongly elevated in lesion tissue  
-- These findings integrate later with MOFA, DIABLO, and WGCNA
+- Strong methylation signatures separate lesion vs NAWM  
+- Many CpGs map to genes relevant to MS (e.g., PALMD)  
+- Immune infiltration strongly increases in lesions  
+- Results integrate later with MOFA, DIABLO, and WGCNA
