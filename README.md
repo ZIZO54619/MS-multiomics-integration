@@ -125,6 +125,7 @@ Lesion and NAWM samples form distinct clusters, reflecting strong transcriptiona
 - Clear gene-level signatures emerge (DEGs)  
 - These genes are later integrated with methylation in MOFA, DIABLO, and SNF
 
+---
 
 ## DNA Methylation Analysis
 
@@ -141,34 +142,10 @@ Beta- and M-values were inspected to ensure correct distribution before filterin
 
 The bimodal distribution is typical for Illumina methylation arrays and indicates good data quality.
 
----
-
-### 🔹 2) Differentially Methylated Positions (DMPs)
-
-A differential methylation analysis identified CpGs that are significantly hyper- or hypo-methylated in lesion tissue.
-
-**Volcano plot of CpGs:**
-
-![DMP volcano](methylation/plotvar2.png)
-
-- Each point = CpG site  
-- X-axis = methylation difference (lesion – NAWM)  
-- Y-axis = −log10(p-value)  
-- Clear sets of hyper- and hypo-methylated CpGs are visible.
 
 ---
 
-### 🔹 3) CpG-level Sample Clustering
-
-PCA/heatmap of significant CpGs shows clear structure and separation between lesion and NAWM samples.
-
-![CpG PCA / heatmap](methylation/combopca.pdf)
-
-This indicates that methylation strongly distinguishes the two tissue types.
-
----
-
-### 🔹 4) Immune Cell Infiltration (CIBERSORT)
+### 🔹 2) Immune Cell Infiltration (CIBERSORT)
 
 Epigenetically inferred immune-cell proportions show higher immune activation in lesion samples.
 
@@ -178,7 +155,7 @@ Lesions exhibit elevated T cells, macrophage activity, and innate immune signals
 
 ---
 
-### 🔹 5) Example Gene: PALMD (CpG + Expression)
+### 🔹 3) Example Gene: PALMD (CpG + Expression)
 
 PALMD shows multiple CpGs significantly altered between lesion and NAWM.  
 These methylation changes correlate with its gene expression level.
@@ -195,3 +172,74 @@ This highlights a direct epigenetic–transcriptomic link relevant to MS lesion 
 - Many CpGs map to genes relevant to MS (e.g., PALMD)  
 - Immune infiltration strongly increases in lesions  
 - Results integrate later with MOFA, DIABLO, and WGCNA
+
+
+## MOFA – Unsupervised Multi-Omics Integration
+
+MOFA (Multi-Omics Factor Analysis) was used to learn shared latent factors that
+capture coordinated variation between **mRNA expression** and **DNA methylation**.
+These factors help summarise the major biological drivers separating **lesion**
+and **NAWM** samples.
+
+---
+
+### 🔹 1) Variance Explained per View
+
+MOFA learns latent factors (F1, F2, …) and estimates how much variation each
+factor explains in each omic (mRNA vs methylation).
+
+![MOFA variance](MOFA/plotvarianceF.png)
+
+- **Factor 1** explains the largest proportion of methylation variance  
+- **Factor 2/3** capture shared variation across both omics  
+- Higher factors explain smaller residual structure  
+
+This indicates strong coordinated structure between the two omics layers.
+
+---
+
+### 🔹 2) Factor Space (Lesion vs NAWM)
+
+Plotting samples along the learned factors shows clear biological separation.
+
+![MOFA scatter](MOFA/correlation between f1,3.png)
+
+- Lesion and NAWM samples cluster apart in the MOFA factor space  
+- Indicates the latent factors capture meaningful disease-related variation  
+
+---
+
+### 🔹 3) Top Features Driving the Factors
+
+MOFA provides feature loadings showing which genes/CpGs contribute most to each factor.
+
+**Top mRNA features (e.g., Factor 1):**
+
+![Top mRNA features](MOFA/topfeatureF1mrna.png)
+
+**Top CpG features (e.g., Factor 1 or 6):**
+
+![Top CpG features](MOFA/topfeatureF6cpg.png)
+
+These genes and CpGs form the core multi-omics signatures differentiating lesion vs NAWM.
+
+---
+
+### 🔹 4) Associations with Clinical Metadata
+
+MOFA factors were tested against metadata such as tissue type, age and gender.
+
+![MOFA metadata heatmap](MOFA/hheatmaP.png)
+
+- Factors associated with **lesion/NAWM** represent biologically meaningful signals  
+- Other factors capture patient-level heterogeneity  
+
+---
+
+### ✔️ Summary (MOFA)
+
+- Learned latent factors capture shared variation across RNA + methylation  
+- Factor 1 strongly separates lesion from NAWM  
+- Multi-omics signatures involve genes (e.g., immune-related) and CpGs with coordinated changes  
+- Metadata associations support biological interpretation  
+
