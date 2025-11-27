@@ -415,9 +415,91 @@ that may be linked to lesion/NAWM biology.
 
 ---
 
-### ✔️ Summary (WGCNA)
 
-- No outliers detected → all samples used  
-- Scale-free topology achieved at chosen β  
-- Multiple gene modules discovered  
-- Modules serve as features for downstream interpretation and integration  
+
+## How to Run the Analysis
+
+All analyses in this project were performed using **R**.
+
+### 🔹 1) Install required packages
+
+```r
+install.packages(c("tidyverse", "data.table", "ggplot2", "pheatmap"))
+
+BiocManager::install(c(
+  "DESeq2", "limma", "WGCNA", "MOFA2", "mixOmics"
+))
+
+install.packages("SNFtool")
+````
+
+---
+
+### 🔹 2) Directory structure
+
+The repository expects the following folder structure:
+
+```text
+data/
+  rna/          # Light-weight processed RNA data (DEGs, subsets)
+  methylation/  # Light-weight CpG subsets
+  clinical/     # Clinical metadata
+
+data-raw/        # Raw matrices (NOT uploaded to GitHub)
+scripts/         # R scripts for each analysis step
+mRNA/            # mRNA analysis plots
+methylation/     # DNA methylation plots
+MOFA/            # MOFA results
+DIABLO/          # DIABLO results
+SNF/             # SNF results
+WGCNA/           # WGCNA results
+```
+
+---
+
+### 🔹 3) Execute the full analysis pipeline
+
+From the project root:
+
+```r
+source("scripts/01_mRNA_DEG_analysis.R")
+source("scripts/02_methylation_preprocess.R")
+source("scripts/03_SNF_pipeline.R")
+source("scripts/04_MOFA_pipeline.R")
+source("scripts/05_DIABLO_pipeline.R")
+source("scripts/06_WGCNA_pipeline.R")
+```
+
+Each script automatically outputs:
+
+* Figures → into the correct folder
+* Processed tables → into `data/`
+* Model objects → into their analysis folder
+
+---
+
+### 🔹 4) Reproducibility
+
+* All scripts are fully reproducible as long as **folder paths** remain unchanged
+* Large raw data remain excluded using `.gitignore`
+* Light-weight subsets are included to ensure examples run without issues
+
+---
+
+
+
+---
+## Team
+
+This project was developed as part of the **BEAM – SOLE Multi-Omics Challenge**.
+
+**Contributors:**
+- **Salma** – Data preprocessing & methylation analysis  
+- **Abdulaziz** – RNA-seq analysis & DIABLO analysis  
+- **Heba** – Visualisation & interpretation  
+- **Mai** – MOFA analysis  
+- **Merna** – SNF & network analysis
+  
+- **Abdulaziz** – Project integration, pipeline design, documentation
+
+> Special thanks to the organisers and mentors of the SOLE Multi-Omics Track.
