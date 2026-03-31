@@ -3,16 +3,19 @@
 #         Load & Install Packages
 # ================================
 
-# Install BiocManager if not already installed
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-
-# Install mixOmics package
-BiocManager::install("mixOmics", update = FALSE, ask = FALSE)
-
-# Set CRAN repository and install additional packages
-options(repos = c(CRAN = "https://cran.r-project.org"))
-install.packages(c("ragg", "ggplot2", "pheatmap", "igraph", "readxl"), dependencies = TRUE, update = FALSE)
+# Fail-fast dependency checks
+required_pkgs <- c(
+  "circlize", "ragg", "mixOmics", "ggplot2", "igraph", "readxl", "Rtsne",
+  "readr", "pheatmap", "cluster", "caret", "tools", "pls", "ComplexHeatmap"
+)
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(
+    "Missing required packages for scripts/05_DIABLO_pipeline.R: ",
+    paste(missing_pkgs, collapse = ", "),
+    ". Please install them before running this script."
+  )
+}
 
 # Load Libraries
 library(circlize)
@@ -39,10 +42,25 @@ library(ComplexHeatmap)
 
 
 # Load Data
-setwd("C:\\Users\\Abdulaziz\\Desktop\\DIABLO_Data")
-metadata <- read_excel("Metad.xlsx")
-methylation_data <- read_csv("mmVals_sig.csv", col_names = TRUE)
-expression_data <- read_csv("Normalized_count_matrix.csv", col_names = TRUE)
+DATA_DIR <- "data"
+METH_INPUT <- file.path(DATA_DIR, "methylation", "mVals_sig.csv")
+RNA_INPUT <- file.path(DATA_DIR, "rna", "Log2_Normalized_count_matrix.csv")
+META_INPUT <- file.path(DATA_DIR, "clinical.xlsx")
+OUT_DIR <- "DIABLO"
+
+required_files <- c(METH_INPUT, RNA_INPUT, META_INPUT)
+missing_files <- required_files[!file.exists(required_files)]
+if (length(missing_files) > 0) {
+  stop(
+    "Missing required input file(s) for DIABLO pipeline: ",
+    paste(missing_files, collapse = ", ")
+  )
+}
+if (!dir.exists(OUT_DIR)) dir.create(OUT_DIR, recursive = TRUE)
+
+metadata <- read_excel(META_INPUT)
+methylation_data <- read_csv(METH_INPUT, col_names = TRUE)
+expression_data <- read_csv(RNA_INPUT, col_names = TRUE)
 
 # Extract Feature Names
 feature_names_meth <- methylation_data[[1]]  # CpG sites
@@ -157,7 +175,7 @@ test_data <- list(
   Transcriptomics = omics_data$Transcriptomics[-which(rownames(omics_data$Transcriptomics) %in% train_samples), ]
 )
 
-train_condition <- Condition[rownames(omics_data$Methylation) %in% train_samples]
+train_condition <- Condition[match(rownames(train_data$Methylation), rownames(omics_data$Methylation))]
 
 
 # ================================
@@ -181,6 +199,25 @@ filtered_DMS <- filtered_DMS[common_samples, ]
 train_condition <- metadata$Sample_source_name_ch1_cpg
 train_condition <- train_condition[match(common_samples, metadata$sample)]
 train_condition <- as.factor(train_condition)
+train_data <- list(
+  Methylation = filtered_DMS[train_samples, , drop = FALSE],
+  Transcriptomics = filtered_RNA[train_samples, , drop = FALSE]
+)
+train_condition <- as.factor(metadata$Sample_source_name_ch1_cpg[
+  match(rownames(train_data$Methylation), metadata$sample)
+])
+
+if (!identical(rownames(train_data$Methylation), rownames(train_data$Transcriptomics))) {
+  stop("Training sample order mismatch between methylation and transcriptomics blocks.")
+}
+if (length(train_condition) != nrow(train_data$Methylation)) {
+  stop("Label vector length does not match number of training samples.")
+}
+if (!identical(rownames(train_data$Methylation), as.character(metadata$sample[
+  match(rownames(train_data$Methylation), metadata$sample)
+]))) {
+  stop("Label order does not match training sample order.")
+}
 
 
 
@@ -238,7 +275,7 @@ cor_matrix <- cor(selected_DMS, selected_RNA, method = "pearson")
 col_fun <- colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))  # تدرج ألوان من -1 إلى 1
 
 # حفظ الخريطة في ملف PDF
-pdf("complex_heatmap.pdf", width = 10, height = 10)
+pdf(file.path(OUT_DIR, "complex_heatmap.pdf"), width = 10, height = 10)
 
 # رسم الخريطة الحرارية
 Heatmap(cor_matrix,
@@ -254,9 +291,9 @@ Heatmap(cor_matrix,
 dev.off()
 
 
-write.csv(cor_matrix, file = "correlation_matrix.csv")
+write.csv(cor_matrix, file = file.path(OUT_DIR, "correlation_matrix.csv"))
 
-pdf("circosPlot.pdf", width = 10, height = 10)  # فتح ملف PDF بالحجم المطلوب
+pdf(file.path(OUT_DIR, "circosPlot.pdf"), width = 10, height = 10)  # فتح ملف PDF بالحجم المطلوب
 # Circos plot
 circosPlot(diablo_model, cutoff = 0.8, line = TRUE, 
            comp = 1, title = "Circos Plot: CpGs vs Genes", 
@@ -265,7 +302,7 @@ circosPlot(diablo_model, cutoff = 0.8, line = TRUE,
 dev.off()
 
 
-pdf("plotIndiv.pdf", width = 10, height = 10)  # فتح ملف PDF بالحجم المطلوب
+pdf(file.path(OUT_DIR, "plotIndiv.pdf"), width = 10, height = 10)  # فتح ملف PDF بالحجم المطلوب
 # Sample plot (PCA-like plot)
 plotIndiv(diablo_model, comp = c(1,2), group = train_condition,
           ind.names = FALSE, legend = TRUE, 
@@ -274,19 +311,19 @@ dev.off()
 
 
 # plot Arrow
-pdf("plotArrow.pdf", width = 10, height = 10)  # Open a PDF file
+pdf(file.path(OUT_DIR, "plotArrow.pdf"), width = 10, height = 10)  # Open a PDF file
 plotArrow(diablo_model, ind.names = FALSE, legend = TRUE, 
           title = 'TCGA, DIABLO comp 1 - 2')
 dev.off()
 
 # Loading plot for component 1
-pdf("plotLoadings_mRNA.pdf", width = 10, height = 10)  # Open a PDF file
+pdf(file.path(OUT_DIR, "plotLoadings_mRNA.pdf"), width = 10, height = 10)  # Open a PDF file
 plotLoadings(diablo_model, comp = 1, block = 'Transcriptomics', method = 'mean', contrib = 'max', name.var = FALSE)
 dev.off()
 
 
 # ROC Curve
-pdf("roc_curves_blocks.pdf", width = 10, height = 10)
+pdf(file.path(OUT_DIR, "roc_curves_blocks.pdf"), width = 10, height = 10)
 par(mfrow = c(1, 2))  # لو عندك 2 omics blocks
 
 # ROC for Transcriptomics
@@ -297,18 +334,18 @@ auroc(diablo_model, roc.block = "Methylation", roc.comp = 1:2, print = TRUE)
 
 dev.off()
 roc_results <- auroc(diablo_model, roc.comp = 1:2, print = FALSE)
-saveRDS(roc_results, "roc_auc_values.rds")
+saveRDS(roc_results, file.path(OUT_DIR, "roc_auc_values.rds"))
 
 
 
 # DMS
-pdf("plotLoadings_DMS.pdf", width = 8, height = 8)  # Open a PDF file
+pdf(file.path(OUT_DIR, "plotLoadings_DMS.pdf"), width = 8, height = 8)  # Open a PDF file
 plotLoadings(diablo_model, comp = 1, block = 'Methylation', method = 'mean', contrib = 'max', name.var = TRUE, size.name = 0.5)
 dev.off()
 
 
 # Biplot
-pdf("biplot.pdf", width = 8, height = 8)  # Open a PDF file
+pdf(file.path(OUT_DIR, "biplot.pdf"), width = 8, height = 8)  # Open a PDF file
 biplot(diablo_model, comp = 1:2, group = train_condition, 
        col = c("lightgreen", "orchid"), 
        title = "Biplot: DIABLO Components vs Samples")
@@ -387,5 +424,4 @@ auc_results <- perf_diablo$AUC
 
 auc_results <- auc(diablo_model, roc.comp = 1)
 print(auc_results)
-
 
