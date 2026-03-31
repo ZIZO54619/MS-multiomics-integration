@@ -1,5 +1,40 @@
-#install packages
-install.packages("splitstackshape")
+# Fail-fast dependency checks
+required_pkgs <- c(
+  "ggfortify", "readr", "minfi", "matrixStats", "stringr", "splitstackshape",
+  "impute", "data.table", "dplyr", "tibble", "limma", "readxl"
+)
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(
+    "Missing required packages for scripts/02_methylation_preprocess.R: ",
+    paste(missing_pkgs, collapse = ", "),
+    ". Please install them before running this script."
+  )
+}
+
+# Deterministic path contract for pipeline
+DATA_DIR <- "data"
+METH_DIR <- file.path(DATA_DIR, "methylation")
+RNA_DIR <- file.path(DATA_DIR, "rna")
+WORK_DIR <- "posthackatho"
+
+if (!dir.exists(METH_DIR)) dir.create(METH_DIR, recursive = TRUE)
+if (!dir.exists(WORK_DIR)) dir.create(WORK_DIR, recursive = TRUE)
+
+METH_INPUT <- file.path(METH_DIR, "GSE224455_series_matrix.txt.gz")
+META_INPUT <- file.path(DATA_DIR, "clinical.xlsx")
+DEG_INPUT <- file.path(RNA_DIR, "deseq.deg.csv")
+NORM_INPUT <- file.path(RNA_DIR, "Log2_Normalized_count_matrix.csv")
+MVALS_SIG_OUTPUT <- file.path(METH_DIR, "mVals_sig.csv")
+
+required_files <- c(METH_INPUT, META_INPUT, DEG_INPUT, NORM_INPUT)
+missing_files <- required_files[!file.exists(required_files)]
+if (length(missing_files) > 0) {
+  stop(
+    "Missing required input file(s) for methylation preprocessing: ",
+    paste(missing_files, collapse = ", ")
+  )
+}
 
 
 #load packages
@@ -16,7 +51,7 @@ library(tibble)
 library(limma)
 
 #reading methylation data 
-methylation=as.data.frame(read_tsv("../GSE224455_series_matrix.txt",comment="!"))
+methylation=as.data.frame(read_tsv(METH_INPUT,comment="!"))
 sum(is.na(methylation)) #6360
 rownames(methylation) <- methylation$ID_REF
 methylation= as.matrix(methylation[,-1])
@@ -28,10 +63,10 @@ methylation.sds.sorted=methylation.sds[order(methylation.sds$sds, decreasing = T
 top20kvariablemeth=rownames(methylation.sds.sorted)[1:20000]
 top20kvariablemethmat=methylation[top20kvariablemeth,]
 meth20kdf=as.data.frame(top20kvariablemethmat)
-write.csv(meth20kdf,"posthackatho/meth20kdf.csv",) #copy pasted from GEO into csv file
+write.csv(meth20kdf, file.path(WORK_DIR, "meth20kdf.csv")) #copy pasted from GEO into csv file
 
 #reading methylation metadata
-meta=readxl::read_xlsx("meta_raw.xlsx", col_names =FALSE)
+meta=readxl::read_xlsx(META_INPUT, col_names =FALSE)
 colnames(meta) <- c("ID", "comb")
 meta= cSplit(meta, "comb", ",")
 meta= cSplit(meta, "comb_1", " ")
@@ -59,7 +94,7 @@ num.mat.imputed=impute.knn(as.matrix(Data_meth),k=10)$data
 num.mat.df= as.data.frame(num.mat.imputed)
 #sum(is.na(num.mat.df)) #0
 
-write.csv(num.mat.df,"posthackatho/impmeth.csv")
+write.csv(num.mat.df, file.path(WORK_DIR, "impmeth.csv"))
 ################################
 #Make GenomicRatioSet from Matrix
 
@@ -118,8 +153,8 @@ plotMDS(getM(mSetSqFlt), top=1000, gene.selection="common",col=pal[factor(meta$p
 # calculate M-values for statistical analysis
 mVals <- getM(mSetSqFlt)
 bVals <- getBeta(mSetSqFlt)
-write.csv(mVals, "posthackatho/mVals.csv")
-write.csv(bVals, "posthackatho/bVals.csv")
+write.csv(mVals, file.path(WORK_DIR, "mVals.csv"))
+write.csv(bVals, file.path(WORK_DIR, "bVals.csv"))
 
 par(mfrow=c(1,2))
 densityPlot(bVals, sampGroups=meta$group, main="Beta values",
@@ -169,7 +204,7 @@ topall <- topTable(fit2, coef=1, genelist=sub, number=Inf, adjust="fdr", p.value
 
 #topall <- topTable(fit2, coef=1, genelist=ann_sub, number=Inf, adjust="fdr", p.value=0.1, lfc=log2(1))
 #in paper they didn't filter out by lfc, and i can see why, all lfc are low 
-write.csv(topall,"posthackatho/topall.csv")
+write.csv(topall, file.path(WORK_DIR, "topall.csv"))
 
 length(unique(topall$UCSC_RefGene_Name)) # 3978 unique genes are differentially methylated #actually 3622 r unique for reason below
 #no this isn't correct for two reasons; first many annotated UCSC names are blank (probe not mapped to gene),second: as annotations are written as BRCA1;BRCA1;BRCA1 and in another line BRCA1;BRCA1 (so these r not couted as 1 unique )
@@ -210,7 +245,7 @@ data.frame(uniquemethgenes, t(sapply(paste0('\\b', uniquemethgenes, '\\b'), func
 })), row.names = NULL) -> resultuniq
 head(resultuniq)
 resultuniqord=result[order(resultuniq$Freq, decreasing = TRUE),]
-write_excel_csv(newtopall, "posthackatho/newtopall.csv")
+write_excel_csv(newtopall, file.path(WORK_DIR, "newtopall.csv"))
 #write.csv (didn't allow writing of lists in the uniq col)
 
 
@@ -219,14 +254,14 @@ length(rownames(topall)) #8343
 #get matrix subetted to sig DMPs only from mVal and bVals
 mVals_sig= mVals[topall$Name,] #Mvalues is better for analysis (use as matrix for MOFA, LDA etc)
 bVals_sig= bVals[topall$Name,] #bvalues is better for visualization (as it has limits from 0-1; check distribution etc) 
-write.csv(mVals_sig, file="posthackatho/mVals_sig.csv")
-write.csv(bVals_sig, file="posthackatho/bVals_sig.csv")
+write.csv(mVals_sig, file = MVALS_SIG_OUTPUT)
+write.csv(bVals_sig, file = file.path(METH_DIR, "bVals_sig.csv"))
 
 ##***************************************************************************************##
 
 ##reading in expression data
-DEGS <- read.csv("deseq.deg.csv", row.names=1)# deseq2 toptable output
-normexpcounts <- read.csv("normalized_counts.csv", row.names=1) #deseq2 normalized output
+DEGS <- read.csv(DEG_INPUT, row.names=1)# deseq2 toptable output
+normexpcounts <- read.csv(NORM_INPUT, row.names=1) #deseq2 normalized output
 #View(normexpcounts[1:5,1:5]) #has geneID as rownas
 #View(DEGS[1:5,1:5])##has geneID as rownas
 

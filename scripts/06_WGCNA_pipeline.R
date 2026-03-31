@@ -1,10 +1,15 @@
 #Step 1: Install and Load Required Packages
 
-# Install Bioconductor manager (if not installed)
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-
-# Install necessary packages
-BiocManager::install(c("WGCNA", "flashClust", "dynamicTreeCut", "GO.db"))
+# Fail-fast dependency checks
+required_pkgs <- c("WGCNA", "flashClust", "dynamicTreeCut", "GO.db", "pheatmap", "clusterProfiler", "org.Hs.eg.db")
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(
+    "Missing required packages for scripts/06_WGCNA_pipeline.R: ",
+    paste(missing_pkgs, collapse = ", "),
+    ". Please install them before running this script."
+  )
+}
 
 # Load the packages
 library(WGCNA)
@@ -14,16 +19,29 @@ library(dynamicTreeCut)
 # Allow large dataset handling
 options(stringsAsFactors = FALSE)
 
-# Set working directory (change this to your dataset location)
-setwd("your/directory/path")
+# Deterministic path contract for pipeline
+DATA_DIR <- "data"
+RNA_INPUT <- file.path(DATA_DIR, "rna", "Log2_Normalized_count_matrix.csv")
+METH_INPUT <- file.path(DATA_DIR, "methylation", "mVals_sig.csv")
+OUT_DIR <- "WGCNA"
+
+required_files <- c(METH_INPUT, RNA_INPUT)
+missing_files <- required_files[!file.exists(required_files)]
+if (length(missing_files) > 0) {
+  stop(
+    "Missing required input file(s) for WGCNA pipeline: ",
+    paste(missing_files, collapse = ", ")
+  )
+}
+if (!dir.exists(OUT_DIR)) dir.create(OUT_DIR, recursive = TRUE)
 
 
 
 #Step 2: Load Your transcriptomics and methylation Data
 
 # Load methylation and transcriptomics data
-meth_data <- read.csv("methylation_data.csv", row.names = 1, header = TRUE)
-expr_data <- read.csv("expression_data.csv", row.names = 1, header = TRUE)
+meth_data <- read.csv(METH_INPUT, row.names = 1, header = TRUE)
+expr_data <- read.csv(RNA_INPUT, row.names = 1, header = TRUE)
 
 # Check dimensions
 dim(meth_data)   # Should return (genes, samples)
@@ -156,6 +174,9 @@ MEList <- moduleEigengenes(expr_data, colors = moduleColors)
 MEs <- MEList$eigengenes
 
 # Correlation between module eigengenes and disease status
+if (!exists("your_MS_status_vector")) {
+  stop("Object `your_MS_status_vector` is required for module-trait correlation and must be defined before running this step.")
+}
 traitData <- as.numeric(factor(your_MS_status_vector))  # Replace with your disease labels (0 = control, 1 = MS)
 moduleTraitCor <- cor(MEs, traitData, use = "p")
 
@@ -201,12 +222,11 @@ edgeList <- data.frame(from = rownames(TOM_selected)[edges[,1]],
                        weight = TOM_selected[edges])
 
 # Save to file
-write.csv(edgeList, "WGCNA_network_for_Cytoscape.csv", row.names = FALSE)
+write.csv(edgeList, file.path(OUT_DIR, "WGCNA_network_for_Cytoscape.csv"), row.names = FALSE)
 
 
 #Step 10: Pathway Enrichment Analysis for Disease Modules
 
-if (!require("clusterProfiler")) install.packages("clusterProfiler")
 library(clusterProfiler)
 
 # Perform GO enrichment analysis on selected module genes

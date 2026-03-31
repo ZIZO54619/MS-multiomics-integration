@@ -1,10 +1,13 @@
-# Install and load required packages
-if (!require("SNFtool")) install.packages("SNFtool")
-if (!require("Rtsne")) install.packages("Rtsne")
-if (!require("readr")) install.packages("readr")
-if (!require("ggplot2")) install.packages("ggplot2")
-if (!require("pheatmap")) install.packages("pheatmap")
-if (!require("cluster")) install.packages("cluster")
+# Fail-fast dependency checks
+required_pkgs <- c("SNFtool", "Rtsne", "readr", "ggplot2", "pheatmap", "cluster")
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(
+    "Missing required packages for scripts/03_SNF_pipeline.R: ",
+    paste(missing_pkgs, collapse = ", "),
+    ". Please install them before running this script."
+  )
+}
 
 library(SNFtool)
 library(Rtsne)
@@ -13,9 +16,25 @@ library(ggplot2)
 library(pheatmap)
 library(cluster)
 
+# Deterministic path contract for pipeline
+DATA_DIR <- "data"
+RNA_INPUT <- file.path(DATA_DIR, "rna", "Log2_Normalized_count_matrix.csv")
+METH_INPUT <- file.path(DATA_DIR, "methylation", "mVals_sig.csv")
+OUT_DIR <- "SNF"
+
+required_files <- c(METH_INPUT, RNA_INPUT)
+missing_files <- required_files[!file.exists(required_files)]
+if (length(missing_files) > 0) {
+  stop(
+    "Missing required input file(s) for SNF pipeline: ",
+    paste(missing_files, collapse = ", ")
+  )
+}
+if (!dir.exists(OUT_DIR)) dir.create(OUT_DIR, recursive = TRUE)
+
 # Load Data
-methylation_data <- read_csv("methaylation.csv", col_names = TRUE)
-expression_data <- read_csv("transcriptomics.csv", col_names = TRUE)
+methylation_data <- read_csv(METH_INPUT, col_names = TRUE)
+expression_data <- read_csv(RNA_INPUT, col_names = TRUE)
 
 # Extract Feature Names
 feature_names_meth <- methylation_data[[1]]  # CpG sites

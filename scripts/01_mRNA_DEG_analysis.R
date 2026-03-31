@@ -1,3 +1,14 @@
+# Fail-fast dependency checks
+required_pkgs <- c("DESeq2", "readxl", "pheatmap", "ggplot2", "readr", "NMF", "openxlsx", "dplyr", "tidyr", "tibble")
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop(
+    "Missing required packages for scripts/01_mRNA_DEG_analysis.R: ",
+    paste(missing_pkgs, collapse = ", "),
+    ". Please install them before running this script."
+  )
+}
+
 # Load necessary libraries
 library(DESeq2)
 library(readxl)
@@ -9,20 +20,46 @@ library(openxlsx)
 library(dplyr)
 library(tidyr)
 library(tibble)
+
+# Deterministic path contract for pipeline
+DATA_DIR <- "data"
+RNA_DIR <- file.path(DATA_DIR, "rna")
+METH_DIR <- file.path(DATA_DIR, "methylation")
+
+if (!dir.exists(RNA_DIR)) dir.create(RNA_DIR, recursive = TRUE)
+if (!dir.exists(METH_DIR)) dir.create(METH_DIR, recursive = TRUE)
+
+PHENO_INPUT <- file.path(DATA_DIR, "clinical.xlsx")
+RAW_COUNTS_INPUT <- file.path(RNA_DIR, "GSE224377_raw_counts_GRCh38.p13_NCBI.xlsx")
+ANNOTATION_INPUT <- file.path(RNA_DIR, "Human.GRCh38.p13.annot.tsv")
+FILTERED_COUNTS_OUTPUT <- file.path(RNA_DIR, "GSE224377_filtered.csv")
+PROCESSED_COUNTS_OUTPUT <- file.path(RNA_DIR, "Processed_GSE224377.csv")
+DEG_OUTPUT <- file.path(RNA_DIR, "deseq.deg.csv")
+NORM_OUTPUT <- file.path(RNA_DIR, "Log2_Normalized_count_matrix.csv")
+
+required_files <- c(PHENO_INPUT, RAW_COUNTS_INPUT, ANNOTATION_INPUT)
+missing_files <- required_files[!file.exists(required_files)]
+if (length(missing_files) > 0) {
+  stop(
+    "Missing required input file(s) for mRNA pipeline: ",
+    paste(missing_files, collapse = ", ")
+  )
+}
+
 # loading data 
-pheno <- read.xlsx("pheno.xlsx", sheet = 1, rowNames = TRUE)
-data_file <- read.xlsx("GSE224377_raw_counts_GRCh38.p13_NCBI.xlsx",sheet=1, rowNames = TRUE)
+pheno <- read.xlsx(PHENO_INPUT, sheet = 1, rowNames = TRUE)
+data_file <- read.xlsx(RAW_COUNTS_INPUT, sheet = 1, rowNames = TRUE)
 data_matrix <- as.matrix(data_file) 
 
 # Remove rows where all values r  zero
 filtered_data <- data_matrix[rowSums(data_matrix != 0) > 0, ]
 
 # Save filtered data
-write.csv(filtered_data,"GSE224377_filtered.csv", row.names=TRUE)
+write.csv(filtered_data, FILTERED_COUNTS_OUTPUT, row.names = TRUE)
 #load daata
-Raw_counts <- read.csv("GSE224377_filtered.csv", row.names=1)
+Raw_counts <- read.csv(FILTERED_COUNTS_OUTPUT, row.names = 1)
 # read annotation file
-annotation <- read.delim("Human.GRCh38.p13.annot.tsv", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+annotation <- read.delim(ANNOTATION_INPUT, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 ##  Assign proper column names
 num_samples <- ncol(Raw_counts)  # Get number of samples
 colnames(Raw_counts) <- paste0("Sample_", seq_len(num_samples))  #  Raw_counts has no column names, this ensures they get unique names.
@@ -48,7 +85,7 @@ final_counts_matrix <- as.matrix(final_counts_agg)
 mode(final_counts_matrix) <- "numeric"
 
 # Save final processed data
-write.csv(final_counts_agg, "Processed_GSE224377.csv", row.names = TRUE, quote = FALSE)
+write.csv(final_counts_agg, PROCESSED_COUNTS_OUTPUT, row.names = TRUE, quote = FALSE)
 
 
 
@@ -57,7 +94,7 @@ hist(log2(as.numeric(unlist(final_counts_agg)) + 1),
      col = "orange", 
      main = "Histogram of Processed Counts (log2)")
 
-processed_data <- read.csv("Processed_GSE224377.csv", row.names=1)
+processed_data <- read.csv(PROCESSED_COUNTS_OUTPUT, row.names = 1)
 
 
 #explore if is there any missing expression value (empty cell)
@@ -125,7 +162,7 @@ res=as.data.frame(res[complete.cases(res), ])
 deseq.deg=res[res$padj < 0.05 & abs(res$log2FoldChange)>1,]
 names_deges=rownames(deseq.deg)
 #export the Degs into your current folder for further analysthis
-write.csv(as.matrix(deseq.deg),file="deseq.deg.csv", quote=F,row.names=T)
+write.csv(as.matrix(deseq.deg), file = DEG_OUTPUT, quote = FALSE, row.names = TRUE)
 
 
 
@@ -168,7 +205,7 @@ with(sig_down, text(log2FoldChange, -log10(padj), labels = rownames(sig_down), p
 dds2 <- estimateSizeFactors(dds)
 normalized_counts <- as.data.frame(counts(dds2, normalized = TRUE))
 log_normalized_counts <- log2(normalized_counts + 1)
-write.csv(log_normalized_counts, "Log2_Normalized_count_matrix.csv", row.names = TRUE, quote = FALSE)
+write.csv(log_normalized_counts, NORM_OUTPUT, row.names = TRUE, quote = FALSE)
 
 #  Extract DEGs expression values
 exp.degs <- as.matrix(normalized_counts[rownames(normalized_counts) %in% rownames(deseq.deg), ])
@@ -184,7 +221,6 @@ aheatmap(log2(exp.degs + 1),
          color = colorRampPalette(c("blue", "white", "red"))(100),
          scale = "row",
          fontsize = 10)
-
 
 
 
