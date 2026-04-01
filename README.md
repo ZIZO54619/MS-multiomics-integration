@@ -522,6 +522,8 @@ source("scripts/06_WGCNA_pipeline.R")
 
 Deterministic output locations used by scripts in this pipeline patch:
 
+Deterministic output locations used by scripts in this pipeline patch:
+
 * `scripts/01_mRNA_DEG_analysis.R` → `data/rna/`
 * `scripts/02_methylation_preprocess.R` → `data/methylation/` and `posthackatho/`
 * `scripts/03_SNF_pipeline.R` → reads from `data/rna/` + `data/methylation/`
@@ -551,3 +553,4 @@ This project was developed as part of the **BEAM – SOLE Multi-Omics Challenge*
 * **Mai** – MOFA analysis
 * **Merna** – SNF & network analysis
 * **Abdulaziz** – Project integration, pipeline design, documentation
+

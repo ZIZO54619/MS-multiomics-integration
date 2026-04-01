@@ -81,6 +81,8 @@ if (all(c("Sample_id_cpg", "Sample_title_cpg") %in% colnames(meta_named))) {
   meta <- meta[, 1:2]
   colnames(meta) <- c("ID", "comb")
 }
+meta=readxl::read_xlsx(META_INPUT, col_names =FALSE)
+colnames(meta) <- c("ID", "comb")
 meta= cSplit(meta, "comb", ",")
 meta= cSplit(meta, "comb_1", " ")
 meta$combo <- paste0(meta$comb_1_2,"_",toupper(str_sub(meta$comb_2, 1,1)))
