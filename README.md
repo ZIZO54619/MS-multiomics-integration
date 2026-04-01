@@ -516,6 +516,12 @@ source("scripts/05_DIABLO_pipeline.R")
 source("scripts/06_WGCNA_pipeline.R")
 ```
 
+> **Scope note:** The deterministic path/dependency hardening in this repository currently covers
+> `scripts/01`, `scripts/02`, `scripts/03`, `scripts/05`, and `scripts/06`.
+> `scripts/04_MOFA_pipeline.R` remains outside the fully aligned deterministic file contract.
+
+Deterministic output locations used by scripts in this pipeline patch:
+
 Deterministic output locations used by scripts in this pipeline patch:
 
 * `scripts/01_mRNA_DEG_analysis.R` → `data/rna/`
@@ -528,7 +534,8 @@ Deterministic output locations used by scripts in this pipeline patch:
 
 ### 4) Reproducibility
 
-* All scripts are fully reproducible as long as **folder paths** remain unchanged
+* Patched scripts (`01`, `02`, `03`, `05`, `06`) are reproducible with the documented path contract
+* `scripts/04_MOFA_pipeline.R` may require additional path/input alignment before fully reproducible execution
 * Large raw data remain excluded using `.gitignore`
 * Light-weight subsets are included so that example analyses run without issues
 

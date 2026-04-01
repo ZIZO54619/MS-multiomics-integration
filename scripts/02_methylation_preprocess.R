@@ -66,6 +66,21 @@ meth20kdf=as.data.frame(top20kvariablemethmat)
 write.csv(meth20kdf, file.path(WORK_DIR, "meth20kdf.csv")) #copy pasted from GEO into csv file
 
 #reading methylation metadata
+# Support either:
+# 1) legacy 2-column headerless format: [ID, comb]
+# 2) clinical.xlsx format with named columns (adapter to [ID, comb])
+meta_named <- readxl::read_xlsx(META_INPUT, col_names = TRUE)
+if (all(c("Sample_id_cpg", "Sample_title_cpg") %in% colnames(meta_named))) {
+  meta <- meta_named[, c("Sample_id_cpg", "Sample_title_cpg")]
+  colnames(meta) <- c("ID", "comb")
+} else {
+  meta <- readxl::read_xlsx(META_INPUT, col_names = FALSE)
+  if (ncol(meta) < 2) {
+    stop("Metadata file must contain either named columns Sample_id_cpg + Sample_title_cpg, or at least two columns (ID, comb).")
+  }
+  meta <- meta[, 1:2]
+  colnames(meta) <- c("ID", "comb")
+}
 meta=readxl::read_xlsx(META_INPUT, col_names =FALSE)
 colnames(meta) <- c("ID", "comb")
 meta= cSplit(meta, "comb", ",")
