@@ -451,7 +451,7 @@ These modules represent groups of genes with coordinated expression patterns tha
 
 All analyses in this project were performed using **R**.
 
-### 1) Install required packages
+### 1) Install required packages (once, before running scripts)
 
 ```r
 install.packages(c("tidyverse", "data.table", "ggplot2", "pheatmap"))
@@ -469,15 +469,26 @@ install.packages("SNFtool")
 
 ---
 
-### 2) Directory structure
+### 2) Directory structure and file contract
 
 The repository expects the following folder structure:
 
 ```text
 data/
-  rna/          # Light-weight processed RNA data (DEGs, subsets)
-  methylation/  # Light-weight CpG subsets
-  clinical/     # Clinical metadata
+  clinical.xlsx
+  rna/
+    GSE224377_raw_counts_GRCh38.p13_NCBI.xlsx
+    Human.GRCh38.p13.annot.tsv
+    # produced by script 01:
+    GSE224377_filtered.csv
+    Processed_GSE224377.csv
+    deseq.deg.csv
+    Log2_Normalized_count_matrix.csv
+  methylation/
+    GSE224455_series_matrix.txt.gz
+    # produced by script 02:
+    mVals_sig.csv
+    bVals_sig.csv
 
 data-raw/       # Raw matrices (NOT uploaded to GitHub)
 scripts/        # R scripts for each analysis step
@@ -505,17 +516,24 @@ source("scripts/05_DIABLO_pipeline.R")
 source("scripts/06_WGCNA_pipeline.R")
 ```
 
-Each script automatically outputs:
+> **Scope note:** The deterministic path/dependency hardening in this repository currently covers
+> `scripts/01`, `scripts/02`, `scripts/03`, `scripts/05`, and `scripts/06`.
+> `scripts/04_MOFA_pipeline.R` remains outside the fully aligned deterministic file contract.
 
-* Figures → into the appropriate results folder
-* Processed tables → into `data/`
-* Model objects → into their analysis folder
+Deterministic output locations used by scripts in this pipeline patch:
+
+* `scripts/01_mRNA_DEG_analysis.R` → `data/rna/`
+* `scripts/02_methylation_preprocess.R` → `data/methylation/` and `posthackatho/`
+* `scripts/03_SNF_pipeline.R` → reads from `data/rna/` + `data/methylation/`
+* `scripts/05_DIABLO_pipeline.R` → reads from `data/`; writes files into `DIABLO/`
+* `scripts/06_WGCNA_pipeline.R` → reads from `data/`; writes network export to `WGCNA/`
 
 ---
 
 ### 4) Reproducibility
 
-* All scripts are fully reproducible as long as **folder paths** remain unchanged
+* Patched scripts (`01`, `02`, `03`, `05`, `06`) are reproducible with the documented path contract
+* `scripts/04_MOFA_pipeline.R` may require additional path/input alignment before fully reproducible execution
 * Large raw data remain excluded using `.gitignore`
 * Light-weight subsets are included so that example analyses run without issues
 
@@ -533,5 +551,3 @@ This project was developed as part of the **BEAM – SOLE Multi-Omics Challenge*
 * **Mai** – MOFA analysis
 * **Merna** – SNF & network analysis
 * **Abdulaziz** – Project integration, pipeline design, documentation
-
-
